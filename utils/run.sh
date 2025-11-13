@@ -1,13 +1,19 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
 # Определяем корневую директорию проекта
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Переходим в корень проекта
 cd "$PROJECT_ROOT"
+
+# Проверяем существование директории backend
+if [ ! -d "backend" ]; then
+    echo "❌ Ошибка: директория backend не найдена в $PROJECT_ROOT"
+    exit 1
+fi
 
 echo "🔨 Запуск backend в режиме разработки..."
 cd backend
@@ -33,15 +39,12 @@ if ps -p $SERVER_PID > /dev/null; then
     echo "🌐 Открытие браузера..."
     
     # Определяем команду для открытия браузера в зависимости от ОС
-    if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [ "$(uname)" = "Darwin" ]; then
         # macOS
         open http://localhost:8080
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    elif [ "$(uname)" = "Linux" ]; then
         # Linux
         xdg-open http://localhost:8080 2>/dev/null || sensible-browser http://localhost:8080 2>/dev/null || echo "Откройте браузер вручную: http://localhost:8080"
-    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-        # Windows (Git Bash)
-        start http://localhost:8080
     else
         echo "Откройте браузер вручную: http://localhost:8080"
     fi
